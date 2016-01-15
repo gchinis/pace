@@ -7,7 +7,7 @@ const encryptionService = require("../service/encryptionService");
 const secureIDGenerator = function () {
 
   var generateSecureID = function () {
-    return encryptionService.encrypt(crypto.randomBytes(32));
+    return encryptionService.encrypt(crypto.randomBytes(32).toString('hex'));
   };
 
   return {

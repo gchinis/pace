@@ -40,8 +40,8 @@ service.getPubliclyVisible = function () {
   );
 };
 
-service.save = function (participant, paymentToken, encryptedSecureID) {
-  encryptedSecureID = encryptedSecureID || 'temp';
+service.save = function (participant, paymentToken) {
+  const encryptedSecureID = secureIDGenerator.generateSecureID();
   return db.insert('insert into participants (firstname, lastname, email, category, birthyear, team, visibility, paymenttoken, secureid) values($1, $2, $3, $4, $5, $6, $7, $8, $9) returning id',
     [participant.firstname, participant.lastname, participant.email, participant.category, participant.birthyear, participant.team, participant.visibility, paymentToken, encryptedSecureID]);
 };

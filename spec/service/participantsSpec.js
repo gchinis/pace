@@ -4,10 +4,14 @@
 /* global describe, beforeEach, afterAll, spyOn, it, expect, fail, jasmine */
 const mockery = require('mockery');
 const Q = require('q');
+const secureIDGenerator = require('../../domain/secureIDGenerator')
+
+const secureId = 'secureId';
+
 
 describe('participants service', () => {
 
-    let dbHelperMock, participants;
+    let dbHelperMock, participants, secureIDGeneratorMock;
 
     beforeEach(() => {
       mockery.enable({
@@ -18,14 +22,23 @@ describe('participants service', () => {
 
       mockery.resetCache();
 
+
       dbHelperMock = {
-        select: jasmine.createSpy()
+        select: jasmine.createSpy(),
+        insert: jasmine.createSpy()
       };
 
+      secureIDGeneratorMock = {
+        generateSecureID: jasmine.createSpy()
+      }
+
       mockery.registerMock('../service/dbHelper', dbHelperMock);
-      mockery.registerAllowables(['q', '../../service/dbHelper.js']);
+      mockery.registerMock('../domain/secureIDGenerator', secureIDGeneratorMock);
+
+      mockery.registerAllowables(['q', '../../service/dbHelper.js', '../../service/secureIDGenerator']);
       participants = require('../../service/participants');
       dbHelperMock.select.and.returnValue(Q.fcall(() => []));
+
     });
 
     describe('createUniqueToken', () => {
@@ -75,5 +88,25 @@ describe('participants service', () => {
         });
       });
     });
+    describe('save', () => {
+
+      it('passes the newly generated secureId in the DB', () => {
+        const aParticipant = {
+          firstname: 'Hertha',
+          lastname: 'Mustermann',
+          email: 'h.mustermann@example.com',
+          category: 'Unicorn',
+          birthyear: 1980,
+          visibility: 'yes',
+          team: 'Crazy runners'
+        };
+
+        secureIDGeneratorMock.generateSecureID.and.returnValue(secureId)
+
+          participants.save(aParticipant, 'a token');
+          const params = dbHelperMock.insert.calls.mostRecent().args[1];
+          expect(params[params.length -1]).toBe(secureId);
+      })
+    })
   }
 );

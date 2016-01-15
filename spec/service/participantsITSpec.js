@@ -54,9 +54,10 @@ describe('participants service', () => {
   });
 
   it('should store and read participants', (done) => {
-    let randomToken = '1234567';
+    const randomToken = '1234567';
+    const secureID = 'SomeID';
 
-    participants.save(aParticipant, randomToken)
+    participants.save(aParticipant, randomToken, secureID)
       .then(participants.getRegistered)
       .then(function (data) {
         expect(data.length).toBe(1);
@@ -66,6 +67,7 @@ describe('participants service', () => {
         expect(data[0].category).toBe(aParticipant.category);
         expect(data[0].birthyear).toBe(aParticipant.birthyear);
         expect(data[0].team).toBe(aParticipant.team);
+        expect(data[0].secureid).toBe(secureID);
         done();
       })
       .fail(fail);

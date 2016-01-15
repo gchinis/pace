@@ -5,34 +5,33 @@
 const mockery = require('mockery');
 const Q = require('q');
 
-
 describe('participants service', () => {
 
-    let dbHelperMock;
+    let dbHelperMock, participants;
 
-    describe('createUniqueToken', () => {
-      let participants;
-      let setupMocks = function () {
+    beforeEach(() => {
+      mockery.enable({
+        useCleanCache: true,
+        warnOnReplace: false,
+        warnOnUnregistered: false
+      });
 
-        mockery.enable({
-          useCleanCache: true,
-          warnOnReplace: false,
-          warnOnUnregistered: false
-        });
-        mockery.resetCache();
-        mockery.registerAllowables(['q', '../../service/dbHelper.js']);
+      mockery.resetCache();
 
-        dbHelperMock = {
-          select: jasmine.createSpy()
-        };
-
-        mockery.registerMock('../service/dbHelper', dbHelperMock);
-
-        participants = require('../../service/participants');
+      dbHelperMock = {
+        select: jasmine.createSpy()
       };
 
+      mockery.registerMock('../service/dbHelper', dbHelperMock);
+      mockery.registerAllowables(['q', '../../service/dbHelper.js']);
+      participants = require('../../service/participants');
+      dbHelperMock.select.and.returnValue(Q.fcall(() => []));
+    });
+
+    describe('createUniqueToken', () => {
+
       beforeEach(() => {
-        setupMocks();
+        dbHelperMock.select.and.returnValue(Q.fcall(() => []));
       });
 
       it('returns a string with 5 upper case characters', (done) => {
@@ -74,8 +73,6 @@ describe('participants service', () => {
           expect(dbHelperMock.select.calls.count()).toBe(2);
           done();
         });
-
-
       });
     });
   }

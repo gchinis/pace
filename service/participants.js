@@ -2,6 +2,7 @@
 /* jshint esnext: true */
 'use strict';
 
+const crypto = require('crypto');
 const Q = require('q');
 const _ = require('lodash');
 const nodemailer = require('nodemailer');
@@ -9,6 +10,9 @@ const sendmailTransport = require('nodemailer-sendmail-transport');
 const config = require('config');
 const calculator = require('../domain/costCalculator');
 const db = require('../service/dbHelper');
+
+// const editUrlGenerator = require('../domain/editUrlGenerator');
+const secureIDGenerator = require('../domain/secureIDGenerator');
 
 let service = {};
 
@@ -36,9 +40,10 @@ service.getPubliclyVisible = function () {
   );
 };
 
-service.save = function (participant, paymentToken) {
-  return db.insert('insert into participants (firstname, lastname, email, category, birthyear, team, visibility, paymenttoken) values($1, $2, $3, $4, $5, $6, $7, $8) returning id',
-    [participant.firstname, participant.lastname, participant.email, participant.category, participant.birthyear, participant.team, participant.visibility, paymentToken]);
+service.save = function (participant, paymentToken, encryptedSecureID) {
+  encryptedSecureID = encryptedSecureID || 'temp';
+  return db.insert('insert into participants (firstname, lastname, email, category, birthyear, team, visibility, paymenttoken, secureid) values($1, $2, $3, $4, $5, $6, $7, $8, $9) returning id',
+    [participant.firstname, participant.lastname, participant.email, participant.category, participant.birthyear, participant.team, participant.visibility, paymentToken, encryptedSecureID]);
 };
 
 service.update = function (participant, id) {
